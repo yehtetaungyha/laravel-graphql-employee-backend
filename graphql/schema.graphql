@@ -1,0 +1,57 @@
+"A date string with format `Y-m-d`, e.g. `2011-05-23`."
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
+
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+"A datetime and timezone string in ISO 8601 format `Y-m-dTH:i:sO`, e.g. `2020-04-20T13:53:12+02:00`."
+scalar DateTimeTz @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTimeTz")
+
+type Query {
+    users: [User] @all (model: "App\\User")
+    user(id: ID @eq): User @find (model: "App\\User")
+    employees: [Employee!]! @all (model: "App\\Employee")
+    employee(id: ID @eq): Employee @find (model: "App\\Employee")
+    me: User @middleware(checks:["auth:api"]) @auth
+}
+
+type Mutation {
+    register(
+        name: String! @rules(apply: ["required"]),
+        email: String! @rules(apply: ["email", "unique:users"]),
+        password: String! @rules(apply: ["min:4"]) @bcrypt
+    ): User! @create (model: "App\\User")
+     createEmployee(
+        employee_name: String! @rules(apply: ["required"]),
+        employee_email: String! @rules(apply: ["email"]),
+        employee_phone: String! @rules(apply: ["required"]),
+        employee_address: String! @rules(apply: ["required"])
+    ): Employee! @create (model: "App\\Employee")
+     updateEmployee(
+        id:ID @rules(apply: ["required"]),
+        employee_name: String! @rules(apply: ["required"]),
+        employee_email: String! @rules(apply: ["email"]),
+        employee_phone: String! @rules(apply: ["required"]),
+        employee_address: String! @rules(apply: ["required"])
+    ): Employee! @update (model: "App\\Employee")
+     deleteEmployee(
+       id:ID! @rules(apply: ["required"])
+    ): Employee! @delete (model: "App\\Employee")
+}
+type User  {
+    id: ID!
+    name: String!
+    email: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Employee {
+    id: ID!
+    employee_name: String!
+    employee_email: String!
+    employee_phone: String!
+    employee_address:String!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
